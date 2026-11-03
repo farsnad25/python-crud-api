@@ -49,13 +49,21 @@ pipeline {
             }
         }
 
-        stage('5. Health Check') {
-            steps {
-                sh 'sleep 3'
-                sh 'curl -fsS http://localhost:5000/health'
-                sh 'docker logs --tail 20 ${CONTAINER_NAME}'
-            }
-        }
+     stage('5. Health Check') {
+    steps {
+        sh 'sleep 5'
+
+        sh '''
+            docker exec ${CONTAINER_NAME} python -c "
+import urllib.request
+response = urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=10)
+print(response.read().decode())
+"
+        '''
+
+        sh 'docker logs --tail 20 ${CONTAINER_NAME}'
+    }
+}
 
     }
 
